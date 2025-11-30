@@ -9,3 +9,19 @@ output
 outputs
 .gradio
 *.so
+
+# Cache directories (downloaded models)
+cache/
+
+# Build and compilation logs
+*.log
+
+# Claude Code workspace
+.claude/
+
+# Backup files
+*.backup
+*.backup-*
+
+# Docker development files
+docker/Dockerfile_NEXT

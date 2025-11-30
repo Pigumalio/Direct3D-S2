@@ -15,6 +15,20 @@ from typing import Any
 
 import gradio as gr
 from gradio.themes.utils import colors, fonts, sizes
+import gradio_client.utils as gc_utils
+
+# --- Patch pour contourner le bug gradio_client json_schema_to_python_type ---
+_orig_json_schema_to_python_type = gc_utils.json_schema_to_python_type
+
+def safe_json_schema_to_python_type(*args, **kwargs):
+    try:
+        return _orig_json_schema_to_python_type(*args, **kwargs)
+    except Exception:
+        # Si le schéma est chelou, on renvoie un type générique
+        return "Any"
+
+gc_utils.json_schema_to_python_type = safe_json_schema_to_python_type
+# -----------------------------------
 
 # -----------------------------------------------------------------------------
 #  THEME  ▸  a soft glass-like dark theme with a vibrant primary accent
@@ -190,4 +204,10 @@ if __name__ == "__main__":
     parser.add_argument("--cached_dir", type=str, default="outputs/web")
     args = parser.parse_args()
     
-    demo.queue().launch(share=True, allowed_paths=[args.cached_dir], server_port=7860)
+    demo.queue().launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        show_api=True,
+        share=False,
+        allowed_paths=[args.cached_dir]
+    )

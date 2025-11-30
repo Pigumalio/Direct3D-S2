@@ -1,0 +1,30 @@
+services:
+  direct3d_s2:
+    build: .
+    ports:
+      - "7860:7860"      # Gradio interface
+    volumes:
+      - ./cache:/root/.cache
+      - .:/workspace/Direct3D-S2           # Mount source code to match WORKDIR
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - SPCONV_ALGO=native
+      - PYCHARM_DEBUG=1  # Enable debugging
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    working_dir: /workspace/Direct3D-S2
+    command: >
+      bash -c "
+      echo 'Building CUDA extensions for mounted source code...' &&
+      cd /workspace/Direct3D-S2/third_party/voxelize &&
+      python setup.py build_ext --inplace &&
+      export PYTHONPATH=/workspace/Direct3D-S2/third_party/voxelize:$$PYTHONPATH &&
+      echo 'Starting Direct3D-S2 application...' &&
+      cd /workspace/Direct3D-S2 &&
+      python app.py
+      "
